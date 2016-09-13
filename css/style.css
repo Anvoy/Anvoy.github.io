@@ -195,6 +195,11 @@ a:active  { color: #ccc }  /* active links    */
 	margin: 0px 0px 10px 0px;	
 }
 
+#maincontent #supplementlink{
+   padding: 0px 0px 10px 0px;
+	margin: 0px 0px 10px 0px;
+}
+
 #maincontent #respform{
 	padding: 7px 0px;
 }
