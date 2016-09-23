@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="Description" content="Seam Carving">
+    <meta name="author" content="CoffeeCup Software, Inc.">
+    <meta name="Copyright" content="Copyright (c) 2010 CoffeeCup, all rights reserved.">
+	<title>Wentian Zhou</title>
+	<style type="text/css" media="screen">
+		html, body, div, header, footer, aside, nav, article, section	{ margin: 0; padding: 0; }
+		header, footer, aside, nav, article, section	{ display: block; }
+		body 			{ color: #333; font: 12 Helvetica, Arial, sans-serif; line-height: 18px; }
+		h2				{ color: #333; }
+		a				{ color: #337810; }
+		p				{ margin: 0 0 18px; }
+		#container		{ width: 760px; margin: 0 auto; }
+		
+		/* Header */
+		header			{ background: rgb(0,51,102); border-bottom: 2px solid #aaa; }
+		header h1  	{ color: #fff; margin: 0 0 1px; padding: 24px 18px 0; }
+		header h3  	{ color: #fff; margin: 0 0 3px; padding: 24px 18px 0; }
+		header p		{ color: #ccc; font-size: 11px; font-weight: bold; padding: 0 18px; }
+		
+		/* Content Style */
+		nav		{ margin-left: 18px; }
+		nav ul	{ padding: 0 18px 9px; }
+		#extra			{ margin: 0 18px; }
+		#extra small	{ font-size: 11px; line-height: 18px; }
+		#content		{ border-bottom: 1px solid #ccc; margin: 0 18px; }
+		#content p, #extra p { padding-right: 18px; }
+		
+		/* Content Positioning and Size */
+		nav		{ float: right; width: 350px; }
+		#content		{  }
+		#extra			{ float: left; width: 350px; }		/* Footer */
+		footer			{ background: rgb(0,51,102); border-bottom: 2px solid #aaa; clear: both; }
+		footer a		{ color: #fff; }
+		footer	p		{ color: #ccc; margin: 0; padding: 0 18px 10px; }
+		footer ul		{ border-bottom: 1px solid #999; list-style: none; margin: 0 18px 6px; padding: 10px 0 6px; }
+		footer li		{ display: inline; font-size: 11px; font-weight: bold; padding-right: 5px; }
+	</style>
+	<!--[if IE]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+</head>
+<body>
+	<div id="container">
+		<header>
+			<h1>CS 691B computational Photography</h1>
+			<h3>Assignment #2: Seam Carving for Content-Aware Image Resizing </h3>
+			<p class="description">Wentian Zhou</p>
+		</header>
+		
+		<div id="wrapper">
+			<section id="content">
+				<h2>Introduction</h2>
+				<p> Seam carving is a technique used for image resizing. Unlike traditional methods (i.e., cropping and stretching), seam caving is achieved by adding or deleting seams from a image.
+					A seam in a image is defined as a pixel path from top to bottom, or left to right. Each seam only occupies one pixel in each row or column, and the successor pixel on the path must be its
+					8-connected neighbor. The selection and ordering of seams
+					are calculated by a graph energy function. In this project, gradient function is employed as the energy function, and dynamic programming is used to speed up seam searching process.
+					Successful examples and failed examples are shown along with some bells and whistles. </p>
+				<h2>Reference</h2>
+				<p>Avidan, Shai, and Ariel Shamir. "Seam carving for content-aware image resizing." ACM Transactions on graphics (TOG). Vol. 26. No. 3. ACM, 2007</p>
+			</section>
+		</div>
+		
+		<div id="wrapper">
+		<section id="content">
+			<h2>Successful Examples</h2>
+			<hr>
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig1_ori.png" width="240" height="240" alt="" title="fig1_ori" align="middle" />
+			Figure 1 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_vertical_seam.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_verticalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 1 after 200 vertical seams removal </p>
+			 
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig5_ori.png" width="240" height="240" alt="" title="fig5_ori" align="middle" />
+			Figure 2 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig5_vertical_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig5_verticalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 2 after 200 seams removal </p>
+			 
+			<p style="clear: both;">
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig4_ori.png" width="240" height="240" alt="" title="fig4_ori" align="middle" />
+			Figure 3 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig4_horizontal_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 horizontal seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig4_horizontalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 3 after 200 seams removal </p>
+			 
+			<p style="clear: both;">
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig6_ori.png" width="240" height="240" alt="" title="fig6_ori" align="middle" />
+			Figure 4 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig6_vertical_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig6_verticalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 4 after 200 seams removal </p>
+			 
+			<p style="clear: both;">
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig7_ori.png" width="240" height="240" alt="" title="fig1_ori" align="middle" />
+			Figure 5 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig7_vertical_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 100 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig7_verticalseam.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 Figure 5 after 100 seams removal </p>
+			 
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig9_ori.png" width="240" height="240" alt="" title="fig1_ori" align="middle" />
+			Figure 6 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig9_horizontal_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 100 horizontal seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig9_horizontalseam.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 Figure 6 after 100 seams removal </p>
+			 
+			<p style="clear: both;">
+			
+		</section>
+		</div>
+		
+		
+		<div id="wrapper">
+		<section id="content">
+			<h2>Bells and Whistles</h2>
+			<hr>
+			<p>In this section, few bells and whistles will be demonstrated in below. </p>
+			<p style="float: left; font-size: 20pt;" > Seam Expansion </p>
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig1_ori.png" width="240" height="240" alt="" title="fig1_ori" align="middle" />
+			Figure 1 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_vertical_seam_addition_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_vertical_seam_addition.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 Figure 1 after 200 seams addition </p>
+			 
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig1_ori.png" width="240" height="240" alt="" title="fig1_ori" align="middle" />
+			Figure 1 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_horizontal_seam_addition_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 horizontal seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_horizontal_seam_addition.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 Figure 1 after 200 seams addition </p>
+			 
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 20pt;" > Optimal Diagonal Resizing </p>
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 40%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig1_ori.png" width="300" height="300" alt="" title="fig1_ori" align="middle" />
+			Figure 1 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 40%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig1_2D.png" width="300" height="300" alt="" title="fig_mask" align="middle" />
+			 Figure 1 after removing 50 vertical seams and 50 horizontal seams by optimal seam order described in the paper</p>
+			 <p style="clear: both;">
+			
+		</section>
+		</div>
+		
+				<div id="wrapper">
+		<section id="content">
+			<h2>Failed Examples</h2>
+			<hr>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig2_ori.png" width="240" height="240" alt="" title="fig2_ori" align="middle" />
+			Figure 7 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig2_vertical_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig2_verticalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 7 after 200 seams removal </p>
+			 
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig3_ori.png" width="240" height="240" alt="" title="fig2_ori" align="middle" />
+			Figure 8 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig3_verticalseam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 vertical seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig3_verticalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 8 after 200 seams removal </p>
+			 
+			<p style="clear: both;">
+			
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 4%; margin-bottom: 0.5em;">
+			<img src="fig8_ori.png" width="240" height="240" alt="" title="fig2_ori" align="middle" />
+			Figure 9 </p>
+			<p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig8_horizontal_seam_mask.png" width="240" height="240" alt="" title="fig_mask" align="middle" />
+			 200 horizontal seams </p>
+			 <p style="float: left; font-size: 9pt; text-align: center; width: 27%; margin-right: 2%; margin-bottom: 0.5em;">
+			<img src="fig8_horizontalseam.png" width="240" height="240" alt="" title="fig_output" align="middle" />
+			 Figure 9 after 200 seams removal </p>
+			 
+			<p style="clear: both;">
+			
+			<p>We can observe from above failed examples that seam carving resizing is not a universal tool for content preserving resizing.
+				  There are a few reasons that may cause these failures. First, uniform gradient map, in figure 7 terraces have a somewhat uniform gradient map, and the seams mask found
+				  by the algorithm sperate within the image causing jagging artifact. Second, the content that we try to preserve have a similar gradient map with the background but
+				  less variant. For example,
+				  in figure 8, part of the shell was included in the seams causing unpleasant artifacts. Third, in order to make seam carving to produce pleasant results, images with uniform
+				   and inconspicuous background are required, for example, figure 1. However, figure 9 has write lines in the background that the algorithm has failed to preserve. </p>
+			
+		</section>
+		</div>
+		
+		<footer>
+
+			<p>CS 691B Computational Photography- Assignment 2</p>
+		</footer>
+	</div>
+</body>
+</html>
